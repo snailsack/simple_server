@@ -7,7 +7,7 @@ module.exports = class Assistant {
     this.request = request;
     this.response = response;
 
-    this.url = new URL(request.url, 'http://localhost:5000/') // require('url').parse(request.url);
+    this.url = require('url').parse(request.url); // require('url').parse(request.url);
     this.path = this.url.pathname;
     this.queryParams = this.url.searchParams;
     this.path = this.url.pathname;
@@ -86,9 +86,9 @@ module.exports = class Assistant {
     let params = {};
     for (let field of fields) {
       // see http://unixpapa.com/js/querystring.html section 3.1
-      let [ name, value ] = field.split('=');
+      let [ author, value ] = field.split('=');
       value = value.replace(/\+/g,' ');
-      params[name] = decodeURIComponent(value);
+      params[author] = decodeURIComponent(value);
     }
     return params;
   }

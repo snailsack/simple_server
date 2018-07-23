@@ -1,44 +1,47 @@
 // SETUP REQUIREMENTS
 const http = require('http');
-const fs = require ('fs');
 const mime = require('mime-types');
-const urlParser = require('url');
+const Assistant = require('./assistant')
 const port = process.env.PORT || 5000;
+let messages = [];
 
 http.createServer(handleRequest).listen(port);
 console.log("Listening on port: " + port);
 
 function handleRequest(request, response) {
-    console.log("request.url = " + request.url);
+  console.log("request.url = " + request.url);
 
-    let url = urlParser.parse(request.url);
-    let path = url.pathname;
-    let fileName;
-    let data;
-    let type = 'text/plain';
-    
-    try {
-        if (request.url === '/') {
-            fileName = 'index.html'
-        } else {
-            fileName = request.url.slice(1)
+  let assistant = new Assistant(request, response);
+  // let url = urlParser.parse(request.url);
+  // let path = url.pathname;
+  let path = assistant.path;
+  // let messages = [];
+
+    ///POSTING
+  try {
+    if (path === '/') {
+      assistant.sendFile('index.html');
+
+    } else if (path === '/chat') {
+      assistant.parsePostParams((params) => {
+        let message = {
+          author: 'Anonymous',
+          body: params.body,
+          when: new Date().toISOString()
         }
-         data = fs.readFileSync(fileName);
-         type = mime.lookup(fileName);
-         response.statusCode = 200;
-    } catch (error) {
-        console.log(error);
-        data = "Error: " + error.toString();
-        response.statusCode = 404;
+        messages.push(message);
+        let data = JSON.stringify(messages)
+        let type = mime.lookup('json');
+        assistant.finishResponse(type, data);
+      })
+        
+    } else {
+      let fileName = path.slice(1)
+      assistant.sendFile(fileName)
     }
-    
+  } catch (error) {
+    assistant.sendError(404, "Error: " + error.toString());
+  }
 
-    let contentType = `${type}; charset=utf-8`
-    
-    response.setHeader('Content-Type', contentType);
-
-    response.write(data);
-
-    response.end();
 }
 
