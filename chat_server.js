@@ -12,10 +12,7 @@ function handleRequest(request, response) {
   console.log("request.url = " + request.url);
 
   let assistant = new Assistant(request, response);
-  // let url = urlParser.parse(request.url);
-  // let path = url.pathname;
   let path = assistant.path;
-  // let messages = [];
 
     ///POSTING
   try {
